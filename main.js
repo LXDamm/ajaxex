@@ -13,27 +13,41 @@ class App {
         this.#categories = categories
     }
     getCategories() {
+        self = this
         const request = new XMLHttpRequest
-        request.onload = function() {
+        request.onload = function () {
             if (this.status == 200) {
                 let data = JSON.parse(this.responseText)
-                console.log(this)
-                this.categories = data
-                this.renderCategories()
+                self.categories = data
+                self.renderCategories()
             }
-        }.bind(this)
+        }
         request.open('GET', 'https://api.chucknorris.io/jokes/categories', true)
         request.send()
     }
     renderCategories() {
-        this.categories.forEach(element => {
-            categoriesListE.innerHTML += `<li><button class="btn">${element}</button></li>`
-        })
+        if (this.categories) {
+            this.categories.forEach(element => {
+                categoriesListE.innerHTML += `<li><button class="btn">${element}</button></li>`
+            })
+        }
     }
     getRandomJoke() {
         const request = new XMLHttpRequest
         request.open('GET', 'https://api.chucknorris.io/jokes/random', true);
-        request.onload = function() {
+        request.onload = function () {
+            if (this.status == 200) {
+                let data = JSON.parse(this.responseText)
+                jokeE.innerHTML = `"${data.value}"`
+            }
+        }
+        request.send()
+    }
+    getRandomJokeByCategory(event) {
+        const category = event.srcElement.innerText
+        const request = new XMLHttpRequest
+        request.open('GET', `https://api.chucknorris.io/jokes/random?category=${category}`, true);
+        request.onload = function () {
             if (this.status == 200) {
                 let data = JSON.parse(this.responseText)
                 jokeE.innerHTML = `"${data.value}"`
@@ -43,9 +57,8 @@ class App {
     }
     addEventListeners() {
         const randomBtnE = document.querySelector('.random-btn')
-        randomBtnE.addEventListener('click', () => {
-            this.getRandomJoke()
-        })
+        randomBtnE.addEventListener('click', () => { this.getRandomJoke() })
+        categoriesListE.addEventListener('click', this.getRandomJokeByCategory)
     }
     render() {
         this.renderCategories()
